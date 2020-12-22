@@ -3,6 +3,8 @@ package main
 import (
 	"strings"
 	"unicode"
+
+	snowball "github.com/kljensen/snowball/english"
 )
 
 // spliter divides the text into words and removes ponctuation
@@ -53,6 +55,14 @@ func removeCommonWords(txtSet []string) (rdcw []string) {
 		if _, ok := commonWords[word]; !ok {
 			rdcw = append(rdcw, word)
 		}
+	}
+	return
+}
+
+func stemWords(txtSet []string) (stm []string) {
+	stm = make([]string, len(txtSet))
+	for pos, txt := range txtSet {
+		stm[pos] = snowball.Stem(txt, false)
 	}
 	return
 }
