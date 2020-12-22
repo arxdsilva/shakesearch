@@ -72,7 +72,7 @@ func stemWords(txtSet []string) (stm []string) {
 func filterText(text string) (filtered []string) {
 	filtered = splitter(text)
 	filtered = toLower(filtered)
-	filtered = removeCommonWords(filtered)
+	// filtered = removeCommonWords(filtered)
 	filtered = stemWords(filtered)
 	return
 }
