@@ -60,3 +60,11 @@ func Test_stemWords(t *testing.T) {
 	assert.Equal(t, "grace", stemmed[16])
 	assert.Equal(t, "whelp", stemmed[18])
 }
+
+func Test_filterText(t *testing.T) {
+	txt := "The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs. Waltz, bad nymph, for quick jigs vex! Fox nymphs grab"
+	f := filterText(txt)
+	assert.Equal(t, "jump", f[3])
+	assert.Equal(t, "grace", f[16])
+	assert.Equal(t, "whelp", f[18])
+}
