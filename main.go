@@ -6,10 +6,8 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
-	"strings"
 
 	"github.com/kpango/glg"
 )
@@ -18,23 +16,19 @@ func main() {
 	searcher := Searcher{}
 	err := searcher.Load("completeworks.txt")
 	if err != nil {
-		log.Fatal(err)
+		glg.Fatal(err)
 	}
-
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/", fs)
-
 	http.HandleFunc("/search", handleSearch(searcher))
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3001"
 	}
-
-	fmt.Printf("Listening on port %s...", port)
+	glg.Infof("Listening on port %s...", port)
 	err = http.ListenAndServe(fmt.Sprintf(":%s", port), nil)
 	if err != nil {
-		log.Fatal(err)
+		glg.Fatal(err)
 	}
 }
 
@@ -48,7 +42,7 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		query, ok := r.URL.Query()["q"]
 		if !ok || len(query[0]) < 1 {
 			err := "missing search query in URL params"
-			glg.Error("handleSearch", "URL.Query", err)
+			glg.Error("[handleSearch]", "URL.Query", err)
 			w.WriteHeader(http.StatusBadRequest)
 			w.Write([]byte(err))
 			return
@@ -58,12 +52,12 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		enc := json.NewEncoder(buf)
 		err := enc.Encode(results)
 		if err != nil {
-			glg.Error("handleSearch", "enc.Encode", err)
+			glg.Error("[handleSearch]", "enc.Encode", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("encoding failure"))
 			return
 		}
-		glg.Printf("[handleSearch] found %d matches", len(results))
+		glg.Infof("[handleSearch] found %d matches for %s", len(results), query[0])
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(buf.Bytes())
 	}
@@ -74,20 +68,25 @@ func (s *Searcher) Load(filename string) error {
 	if err != nil {
 		return fmt.Errorf("Load: %w", err)
 	}
-	s.CompleteWorks = strings.ToLower(string(dat))
-	s.Index = suffixarray.New(dat)
+	s.CompleteWorks = string(bytes.ToLower(dat))
+	s.Index = suffixarray.New(bytes.ToLower(dat))
 	return nil
 }
 
+// Search looks for the query
+//
+// problem:
+// sometimes two matches can be really close, like in the same sentence
+// this leads to two matches, but should lead to only one
 func (s *Searcher) Search(query string) (results []string) {
 	qSplitted := filterText(query)
 	for _, word := range qSplitted {
 		idxs := s.Index.Lookup([]byte(word), -1)
 		for _, idx := range idxs {
 			maxIdx := idx + 250
-			cwSize := len(s.CompleteWorks)
-			if maxIdx > cwSize {
-				maxIdx = cwSize - 1
+			cwLen := len(s.CompleteWorks)
+			if maxIdx > cwLen {
+				maxIdx = cwLen - 1
 			}
 			minIdx := idx - 250
 			if minIdx < 0 {
