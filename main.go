@@ -84,7 +84,16 @@ func (s *Searcher) Search(query string) (results []string) {
 	for _, word := range qSplitted {
 		idxs := s.Index.Lookup([]byte(word), -1)
 		for _, idx := range idxs {
-			results = append(results, s.CompleteWorks[idx-250:idx+250])
+			maxIdx := idx + 250
+			cwSize := len(s.CompleteWorks)
+			if maxIdx > cwSize {
+				maxIdx = cwSize - 1
+			}
+			minIdx := idx - 250
+			if minIdx < 0 {
+				minIdx = 0
+			}
+			results = append(results, s.CompleteWorks[minIdx:maxIdx])
 		}
 	}
 	return results
