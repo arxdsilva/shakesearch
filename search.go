@@ -59,6 +59,8 @@ func removeCommonWords(txtSet []string) (rdcw []string) {
 	return
 }
 
+// stemWords reduces the words to its stem base form,
+// eg: auditor > audit
 func stemWords(txtSet []string) (stm []string) {
 	stm = make([]string, len(txtSet))
 	for pos, txt := range txtSet {
