@@ -85,7 +85,7 @@ func (s *Searcher) Search(query string) (results []string) {
 		for _, idx := range idxs {
 			maxIdx := idx + 250
 			cwLen := len(s.CompleteWorks)
-			if maxIdx > cwLen {
+			if maxIdx >= cwLen {
 				maxIdx = cwLen - 1
 			}
 			minIdx := idx - 250
