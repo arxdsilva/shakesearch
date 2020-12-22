@@ -68,7 +68,7 @@ func (s *Searcher) Load(filename string) error {
 	if err != nil {
 		return fmt.Errorf("Load: %w", err)
 	}
-	s.CompleteWorks = string(bytes.ToLower(dat))
+	s.CompleteWorks = string(dat)
 	s.Index = suffixarray.New(bytes.ToLower(dat))
 	return nil
 }
