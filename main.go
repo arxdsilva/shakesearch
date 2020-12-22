@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/kpango/glg"
 )
 
 func main() {
@@ -45,8 +47,10 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, ok := r.URL.Query()["q"]
 		if !ok || len(query[0]) < 1 {
+			err := "missing search query in URL params"
+			glg.Error("handleSearch", "URL.Query", err)
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("missing search query in URL params"))
+			w.Write([]byte(err))
 			return
 		}
 		results := searcher.Search(query[0])
@@ -54,10 +58,12 @@ func handleSearch(searcher Searcher) func(w http.ResponseWriter, r *http.Request
 		enc := json.NewEncoder(buf)
 		err := enc.Encode(results)
 		if err != nil {
+			glg.Error("handleSearch", "enc.Encode", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("encoding failure"))
 			return
 		}
+		glg.Printf("[handleSearch] found %d matches", len(results))
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(buf.Bytes())
 	}
