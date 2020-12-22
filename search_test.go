@@ -68,3 +68,10 @@ func Test_filterText(t *testing.T) {
 	assert.Equal(t, "grace", f[16])
 	assert.Equal(t, "whelp", f[18])
 }
+
+func Test_removeDuplicates(t *testing.T) {
+	idxs := []int{100, 200, 300, 400, 500, 600, 700}
+	idxs = removeDuplicates(idxs)
+	expected := []int{100, 400, 700}
+	assert.Equal(t, expected, idxs)
+}

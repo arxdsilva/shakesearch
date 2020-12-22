@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 
 	"github.com/kpango/glg"
 )
@@ -73,15 +74,14 @@ func (s *Searcher) Load(filename string) error {
 	return nil
 }
 
-// Search looks for the query
-//
-// problem:
-// sometimes two matches can be really close, like in the same sentence
-// this leads to two matches, but should lead to only one
 func (s *Searcher) Search(query string) (results []string) {
 	qSplitted := filterText(query)
 	for _, word := range qSplitted {
 		idxs := s.Index.Lookup([]byte(word), -1)
+		sort.SliceStable(idxs, func(i, j int) bool {
+			return idxs[i] < idxs[j]
+		})
+		idxs = removeDuplicates(idxs)
 		for _, idx := range idxs {
 			maxIdx := idx + 250
 			cwLen := len(s.CompleteWorks)

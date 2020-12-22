@@ -76,3 +76,17 @@ func filterText(text string) (filtered []string) {
 	filtered = stemWords(filtered)
 	return
 }
+
+func removeDuplicates(idxs []int) (dFree []int) {
+	for n, idx := range idxs {
+		if n == 0 {
+			dFree = append(dFree, idx)
+			continue
+		}
+		if (dFree[len(dFree)-1] + 250) > idx {
+			continue
+		}
+		dFree = append(dFree, idx)
+	}
+	return
+}
